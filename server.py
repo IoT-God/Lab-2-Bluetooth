@@ -7,8 +7,7 @@ import time
 def send_server_info():
     server_info = {
         "cpu_temperature": fc.cpu_temperature(),
-        "power_level": fc.power_read(),
-        "expected_speed": 5*(1-fc.power_read())
+        "power_level": fc.power_read()
     }
     return json.dumps(server_info).encode()
 
@@ -24,8 +23,6 @@ print("listening on port ", port)
 try:
     client, clientInfo = s.accept()
     print("server recv from: ", clientInfo)
-    thread = threading.Thread(target=send_server_info, args=(client,))
-    thread.start()
 
     while True:
         data = client.recv(size)
@@ -37,12 +34,12 @@ try:
                 client.send(message.encode())
             elif "power" in str(data):
                 cpu_tem = str(fc.power_read())
-                message = "Power is at " + cpu_tem + ".\n"
+                message = "Power is at " + cpu_tem + "%.\n"
                 client.send(message.encode())
             else:
                 client.send(send_server_info() + "\n".encode())
 
-            client.send("Your data is: " + data + ".")
+            client.send("Your message is: ".encode() + data)
 
 
 except Exception as e:
